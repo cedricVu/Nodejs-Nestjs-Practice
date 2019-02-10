@@ -1,34 +1,67 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpException, HttpStatus, UsePipes, Logger } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import { IdeaDTO } from './idea.dto';
+import { ValidationPipe } from 'src/shared/validation.pipe';
 
 @Controller('idea')
 export class IdeaController {
+    private logger = new Logger('IdeaController');
 
     constructor(private ideaService: IdeaService) {}
 
     @Get()
-    showAllIdeas() {
-        return this.ideaService.getAllIdeas();
+    async showAllIdeas() {
+        try {
+            return await this.ideaService.getAllIdeas();
+        } catch (error) {
+            throw new HttpException(error, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Post()
-    createNewIdea(@Body() data: IdeaDTO) {
-        return this.ideaService.createAnIdea(data);
+    @UsePipes(new ValidationPipe())
+    async createNewIdea(@Body() data: IdeaDTO) {
+        try {
+            this.logger.log(JSON.stringify(data));
+            return await this.ideaService.createAnIdea(data);            
+        } catch (e) {
+            throw new HttpException(e, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Get(':id')
-    readAnIdea(@Param('id') id: string) {
-        return this.ideaService.getOneIdea(id);
+    async readAnIdea(@Param('id') id: string) {
+        try {
+            const idea = await this.ideaService.getOneIdea(id);
+            if (!idea) {
+                throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+            }
+            return idea;
+        } catch (e) {
+            throw new HttpException(e, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Put(':id')
-    updateAnIdea(@Param('id') id: string, @Body() data: Partial<IdeaDTO>) {
-        return this.ideaService.updateAnIdea(id, data);
+    @UsePipes(new ValidationPipe())
+    async updateAnIdea(@Param('id') id: string, @Body() data: Partial<IdeaDTO>) {
+        try {
+            const idea = await this.ideaService.updateAnIdea(id, data);
+            if (!idea) {
+                throw new HttpException('Not found', HttpStatus.NOT_FOUND);
+            }
+            return idea;
+        } catch (error) {
+            throw new HttpException(error, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Delete(':id')
-    deleteAnIdea(@Param('id') id: string) {
-        return this.ideaService.destroyAnIdea(id);
+    async deleteAnIdea(@Param('id') id: string) {
+        try {
+            return await this.ideaService.destroyAnIdea(id);
+        } catch (error) {
+            throw new HttpException(error, HttpStatus.BAD_REQUEST);
+        }
     }
 }

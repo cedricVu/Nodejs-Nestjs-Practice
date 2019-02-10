@@ -8,12 +8,12 @@ import { IdeaDTO } from './idea.dto';
 export class IdeaService {
     constructor(@InjectRepository(IdeaEntity) private readonly ideaRepository: Repository<IdeaEntity>) {}
 
-    async getAllIdeas():  Promise<IdeaEntity[]> {
-        return await this.ideaRepository.find();
+    getAllIdeas():  Promise<IdeaEntity[]> {
+        return this.ideaRepository.find();
     }
 
-    async getOneIdea(id: string): Promise<IdeaEntity> {
-        return await this.ideaRepository.findOne({
+    getOneIdea(id: string): Promise<IdeaEntity> {
+        return this.ideaRepository.findOne({
             where: {
                 id
             }
@@ -26,8 +26,8 @@ export class IdeaService {
         return idea;
     }
 
-    async updateAnIdea(id: string, data: Partial<IdeaDTO>) {
-        return await this.ideaRepository.update(
+    updateAnIdea(id: string, data: Partial<IdeaDTO>) {
+        return this.ideaRepository.update(
             {
                 id
             },
@@ -35,7 +35,7 @@ export class IdeaService {
         );
     }
 
-    async destroyAnIdea(id: string) {
-        return await this.ideaRepository.delete({ id });
+    destroyAnIdea(id: string) {
+        return this.ideaRepository.delete({ id });
     }
 }
